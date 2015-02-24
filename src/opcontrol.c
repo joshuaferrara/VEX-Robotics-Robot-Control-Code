@@ -13,6 +13,12 @@ TaskHandle drivingTask;
 TaskHandle manipulatorTask;
 /** Variable to hold reference to the speaker task */
 TaskHandle speakerTask;
+/** Variable to determine if we are in internet mode */
+bool internetMode = false;
+/** Variable to hold y-axis motor shit */
+int yAxisMotorShit;
+/** Variable to hold x-axis motor shit */
+int xAxisMotorShit;
 
 /**
  * This task drives the motors required to move the robot. \n
@@ -143,36 +149,34 @@ void operatorControl() {
 				lastAnnounce = millis();
 			}
 		} else {
+		    internetMode = true;
 			manipulatorTask = taskCreate(ManipulatorTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
 			speakerTask = taskCreate(SpeakerTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
 
 			while(1) {
-				if (lastAnnounce + 5000 > millis())
-					continue;
-
-				fputs("joshbot v1.0 connected we rowdy", uart1);
-				lastAnnounce = millis();
+				if (lastAnnounce + 5000 < millis()) {
+					fputs("joshbot v1.0 connected we rowdy", uart1);
+				    lastAnnounce = millis();
+				}
 
 				char* strBuff;
 				char* ret = fgets(strBuff, 6, uart1);
 
 				if (ret != NULL) {
-					//Packet Example:
-					// Send a int like this:
-					// 012710 (Sets motor 10 to -127)
-					// 000010 (Sets motor 10 to 0)
-					// 112710 (Sets motor 10 to 127)
-					// 112701 (Sets motor 1 to 127)
-					bool positive = false;
-					char dirChar = ret[0];
-					if (dirChar == '0') {
-						positive = false;
-					} else {
-						positive = true;
-					}
-					char* motorValue[3];
-					strncpy(motorValue, ret + 1, 3);
+				    xAxisMotorShit = 0;
+				    yAxisMotorShit = 0;
 
+                    //What do we need to set the motor to?
+                    int mVal;
+                    char* substr;
+                    strncpy(substr, ret+1, strlen(ret));
+                    mVal = atoi(substr);
+
+                    if (ret[0] == 'Y') {
+                        yAxisMotorShit = mVal;
+                    } else if (ret[0] == 'X') {
+                        xAxisMotorShit = mVal;
+                    }
 				}
 			}
 		}
