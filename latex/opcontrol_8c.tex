@@ -1,0 +1,130 @@
+\hypertarget{opcontrol_8c}{}\section{src/opcontrol.c File Reference}
+\label{opcontrol_8c}\index{src/opcontrol.\+c@{src/opcontrol.\+c}}
+
+
+File for operator control code.  
+
+
+{\ttfamily \#include \char`\"{}main.\+h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{opcontrol_8c_afd7bb0b171af067adb66e1bbb261b24e}{Driving\+Task} (void $\ast$arg)
+\item 
+void \hyperlink{opcontrol_8c_ad72b529d1c69d59bc8e249914e1be063}{Manipulator\+Task} (void $\ast$arg)
+\item 
+void \hyperlink{opcontrol_8c_af0e5dc95252c94a68674d114d0002a33}{Speaker\+Task} (void $\ast$arg)
+\item 
+void \hyperlink{opcontrol_8c_ac71a94af413917f27d108e95c4d6f6a7}{operator\+Control} ()
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_a_p_i_8h_a23dca3c0de10682afb982677ff292f77}{Task\+Handle} \hyperlink{opcontrol_8c_a4dc13aaeb28266a76b9821477443fdf9}{driving\+Task}
+\item 
+\hyperlink{_a_p_i_8h_a23dca3c0de10682afb982677ff292f77}{Task\+Handle} \hyperlink{opcontrol_8c_aefcbe4fe5546f5f7f70626c1f5fe5ee7}{manipulator\+Task}
+\item 
+\hyperlink{_a_p_i_8h_a23dca3c0de10682afb982677ff292f77}{Task\+Handle} \hyperlink{opcontrol_8c_a29754c0d165c3e366278bf93ee231e35}{speaker\+Task}
+\item 
+const char $\ast$ \hyperlink{opcontrol_8c_a6b0aa4824b6bd2dd7643da0ce9d5fbf1}{songs} \mbox{[}10\mbox{]}
+\item 
+long \hyperlink{opcontrol_8c_a4da418467b98f6954cb8d0cf3d9b122b}{last\+Played}
+\item 
+long \hyperlink{opcontrol_8c_ac9f4fe2e8e1c1fd43f581cc76201bc23}{last\+Announce}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+File for operator control code. 
+
+This file should contain the user \hyperlink{opcontrol_8c_ac71a94af413917f27d108e95c4d6f6a7}{operator\+Control()} function and any functions related to it. 
+
+\subsection{Function Documentation}
+\hypertarget{opcontrol_8c_afd7bb0b171af067adb66e1bbb261b24e}{}\index{opcontrol.\+c@{opcontrol.\+c}!Driving\+Task@{Driving\+Task}}
+\index{Driving\+Task@{Driving\+Task}!opcontrol.\+c@{opcontrol.\+c}}
+\subsubsection[{Driving\+Task}]{\setlength{\rightskip}{0pt plus 5cm}void Driving\+Task (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{arg}
+\end{DoxyParamCaption}
+)}\label{opcontrol_8c_afd7bb0b171af067adb66e1bbb261b24e}
+This task drives the motors required to move the robot. ~\newline
+Motor Assignments\+: ~\newline
+ Front Left = 2 ~\newline
+ Front Right = 3 ~\newline
+ Back Left = 4 ~\newline
+ Back Right = 5 ~\newline
+\hypertarget{opcontrol_8c_ad72b529d1c69d59bc8e249914e1be063}{}\index{opcontrol.\+c@{opcontrol.\+c}!Manipulator\+Task@{Manipulator\+Task}}
+\index{Manipulator\+Task@{Manipulator\+Task}!opcontrol.\+c@{opcontrol.\+c}}
+\subsubsection[{Manipulator\+Task}]{\setlength{\rightskip}{0pt plus 5cm}void Manipulator\+Task (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{arg}
+\end{DoxyParamCaption}
+)}\label{opcontrol_8c_ad72b529d1c69d59bc8e249914e1be063}
+This task drives the motors required to use our manipulator. ~\newline
+Motor Assignments\+: ~\newline
+Bottom Motor = 6 ~\newline
+Top Motor = 7 ~\newline
+Very tip top motor = 8 \hypertarget{opcontrol_8c_ac71a94af413917f27d108e95c4d6f6a7}{}\index{opcontrol.\+c@{opcontrol.\+c}!operator\+Control@{operator\+Control}}
+\index{operator\+Control@{operator\+Control}!opcontrol.\+c@{opcontrol.\+c}}
+\subsubsection[{operator\+Control}]{\setlength{\rightskip}{0pt plus 5cm}void operator\+Control (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{opcontrol_8c_ac71a94af413917f27d108e95c4d6f6a7}
+Runs the user operator control code. This function will be started in its own task with the default priority and stack size whenever the robot is enabled via the Field Management System or the V\+E\+X Competition Switch in the operator control mode. If the robot is disabled or communications is lost, the operator control task will be stopped by the kernel. Re-\/enabling the robot will restart the task, not resume it from where it left off.
+
+If no V\+E\+X Competition Switch or Field Management system is plugged in, the V\+E\+X Cortex will run the operator control task. Be warned that this will also occur if the V\+E\+X Cortex is tethered directly to a computer via the U\+S\+B A to A cable without any V\+E\+X Joystick attached.
+
+Code running in this task can take almost any action, as the V\+E\+X Joystick is available and the scheduler is operational. However, proper use of \hyperlink{_a_p_i_8h_a1c59207742a1acf45a8957d7f04f9dfe}{delay()} or \hyperlink{_a_p_i_8h_ae93bc867b1aa4a12d6536a497f1b6869}{task\+Delay\+Until()} is highly recommended to give other tasks (including system tasks such as updating L\+C\+Ds) time to run.
+
+This task should never exit; it should end with some kind of infinite loop, even if empty. \hypertarget{opcontrol_8c_af0e5dc95252c94a68674d114d0002a33}{}\index{opcontrol.\+c@{opcontrol.\+c}!Speaker\+Task@{Speaker\+Task}}
+\index{Speaker\+Task@{Speaker\+Task}!opcontrol.\+c@{opcontrol.\+c}}
+\subsubsection[{Speaker\+Task}]{\setlength{\rightskip}{0pt plus 5cm}void Speaker\+Task (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{arg}
+\end{DoxyParamCaption}
+)}\label{opcontrol_8c_af0e5dc95252c94a68674d114d0002a33}
+This task controls the output of the speaker on our robot. 
+
+\subsection{Variable Documentation}
+\hypertarget{opcontrol_8c_a4dc13aaeb28266a76b9821477443fdf9}{}\index{opcontrol.\+c@{opcontrol.\+c}!driving\+Task@{driving\+Task}}
+\index{driving\+Task@{driving\+Task}!opcontrol.\+c@{opcontrol.\+c}}
+\subsubsection[{driving\+Task}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Task\+Handle} driving\+Task}\label{opcontrol_8c_a4dc13aaeb28266a76b9821477443fdf9}
+Variable to hold reference to the drive task \hypertarget{opcontrol_8c_ac9f4fe2e8e1c1fd43f581cc76201bc23}{}\index{opcontrol.\+c@{opcontrol.\+c}!last\+Announce@{last\+Announce}}
+\index{last\+Announce@{last\+Announce}!opcontrol.\+c@{opcontrol.\+c}}
+\subsubsection[{last\+Announce}]{\setlength{\rightskip}{0pt plus 5cm}long last\+Announce}\label{opcontrol_8c_ac9f4fe2e8e1c1fd43f581cc76201bc23}
+Record of last time we have announced robot version to serial connection. \hypertarget{opcontrol_8c_a4da418467b98f6954cb8d0cf3d9b122b}{}\index{opcontrol.\+c@{opcontrol.\+c}!last\+Played@{last\+Played}}
+\index{last\+Played@{last\+Played}!opcontrol.\+c@{opcontrol.\+c}}
+\subsubsection[{last\+Played}]{\setlength{\rightskip}{0pt plus 5cm}long last\+Played}\label{opcontrol_8c_a4da418467b98f6954cb8d0cf3d9b122b}
+Last time a song was played \hypertarget{opcontrol_8c_aefcbe4fe5546f5f7f70626c1f5fe5ee7}{}\index{opcontrol.\+c@{opcontrol.\+c}!manipulator\+Task@{manipulator\+Task}}
+\index{manipulator\+Task@{manipulator\+Task}!opcontrol.\+c@{opcontrol.\+c}}
+\subsubsection[{manipulator\+Task}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Task\+Handle} manipulator\+Task}\label{opcontrol_8c_aefcbe4fe5546f5f7f70626c1f5fe5ee7}
+Variable to hold reference to the manipulator task \hypertarget{opcontrol_8c_a6b0aa4824b6bd2dd7643da0ce9d5fbf1}{}\index{opcontrol.\+c@{opcontrol.\+c}!songs@{songs}}
+\index{songs@{songs}!opcontrol.\+c@{opcontrol.\+c}}
+\subsubsection[{songs}]{\setlength{\rightskip}{0pt plus 5cm}const char$\ast$ songs\mbox{[}10\mbox{]}}\label{opcontrol_8c_a6b0aa4824b6bd2dd7643da0ce9d5fbf1}
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= \{
+        \textcolor{stringliteral}{"Ride:d=4,o=5,b=160:a,32e,8a,c6,8p,a,8p,c6,32a,8c6,e6,8p,c6,8p,e6,32c6,8e6,g6,8p,
+       g,8p,c6,32g,8c6,2e6,p"},
+        \textcolor{stringliteral}{"
+      TakeOnMe:d=4,o=4,b=160:8f#5,8f#5,8f#5,8d5,8p,8b,8p,8e5,8p,8e5,8p,8e5,8g#5,8g#5,8a5,8b5,8a5,8a5,8a5,
+      8e5,8p,8d5,8p,8f#5,8p,8f#5,8p,8f#5,8e5,8e5,8f#5,8e5,8f#5,8f#5,8f#5,8d5,8p,8b,8p,8e5,8p,8e5,8p,8e5,8g#5,8g#5,8a5,8b5,8a5,8a5,8a5,8e5,8p,8d5,8p,8f#5,8p,8f#5,8p,8f#5,8e5,8e5"},
+        \textcolor{stringliteral}{"
+      MonkeyWr:d=32,o=6,b=45:g,g,f,f,e,e,d,d,f,f,e,e,d,d,c,c,d,d,c,c,a5,a5,c,c,d,d,c,c,d,d,e,d,g,g,f,f,e,e,d,d,f,f,e,e,d,d,c,c,d,d,c,c,a5,a5,c,c,d,d,c,c,d,d,e,d"},
+        \textcolor{stringliteral}{"
+      MyHero:d=16,o=6,b=40:32p,c,c,d.,c,8c.,a5,32c,4a5,c,c,d.,c,8c.,a5,32c,4a5,8e,8f,g.,32f,32d,32d,8c.,32c,32a,g,g,f,8c"},
+        \textcolor{stringliteral}{"
+      FinalCou:d=4,o=5,b=140:16c#6,32b,32p,8c#.6,16p,f#,p.,32d6,32p,32c#6,32p,32d6,16p.,32c#6,16p.,b.,p,3
+      2d6,32p,32c#6,32p,d6,f#,p.,32b,32p,32a,32p,32b,16p.,32a,16p.,32g#,16p.,32b,16p.,a.,32c#6,32p,32b,32p,c#6,2f#
+      ,p,16p,32d6,32p,32c#6,32p,32d6,16p.,32c#6,16p.,b.,p,32d6,32p,32c#6,32p,d6,f#,p.,32b,32p,32a,32p,32b,16p.,32a
+      ,16p.,32g#,16p.,32b,16p.,2a,16p,32g#,32p,32a,32p,b.,16a,16b,8c#6,8b,8a,8g#,f#,d6,1c#6,8p,16c#6,16d6,16c#6,16b,2c#.6,16p"},
+        \textcolor{stringliteral}{"
+      Theme:d=4,o=6,b=127:8c5,16d5,16d5,8d5,d5,8c5,8c5,8c5,8c5,16d\_5,16d\_5,8d\_5,d\_5,8d5,8d5,8d5,8c5,16d5,16d5,8d5,d5,8c5,8c5,8c5,8c5,16d\_5,16d\_5,8d\_5,d\_5,8d5,8c\_5,8c5,8c,2b,8g,8f,2g"},
+        \textcolor{stringliteral}{""},
+\}
+\end{DoxyCode}
+R\+T\+T\+L songs \hypertarget{opcontrol_8c_a29754c0d165c3e366278bf93ee231e35}{}\index{opcontrol.\+c@{opcontrol.\+c}!speaker\+Task@{speaker\+Task}}
+\index{speaker\+Task@{speaker\+Task}!opcontrol.\+c@{opcontrol.\+c}}
+\subsubsection[{speaker\+Task}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Task\+Handle} speaker\+Task}\label{opcontrol_8c_a29754c0d165c3e366278bf93ee231e35}
+Variable to hold reference to the speaker task 
