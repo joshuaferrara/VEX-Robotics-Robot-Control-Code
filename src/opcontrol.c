@@ -30,10 +30,18 @@ int xAxisMotorShit;
  */
 void DrivingTask(void *arg) {
 	int X2 = 0, Y1 = 0, X1 = 0, threshold = 15;
+	xAxisMotorShit = 0;
+	yAxisMotorShit = 0;
 	while (1) {
-		Y1 = (abs(joystickGetAnalog(1, 4)) > threshold ? joystickGetAnalog(1, 4) : 0);
-		X1 = (abs(joystickGetAnalog(1, 1)) > threshold ? joystickGetAnalog(1, 1) : 0);
-		X2 = (abs(joystickGetAnalog(1, 3)) > threshold ? -joystickGetAnalog(1, 3) : 0);
+		if (internetMode) {
+			Y1 = (abs(joystickGetAnalog(1, 4)) > threshold ? joystickGetAnalog(1, 4) : 0);
+			X1 = (abs(joystickGetAnalog(1, 1)) > threshold ? joystickGetAnalog(1, 1) : 0);
+			X2 = (abs(joystickGetAnalog(1, 3)) > threshold ? -joystickGetAnalog(1, 3) : 0);
+		} else {
+			Y1 = (abs(xAxisMotorShit) > threshold ? xAxisMotorShit : 0);
+			X1 = (abs(joystickGetAnalog(1, 1)) > threshold ? joystickGetAnalog(1, 1) : 0); //TODO: Strafing not yet implemented in web interface
+			X2 = (abs(yAxisMotorShit) > threshold ? -yAxisMotorShit : 0);
+		}
 
 		if (X1 < 14 && X1 > -14) {
 			motorSet(2, Y1 + X2 + X1);
@@ -136,47 +144,46 @@ void operatorControl() {
 	if (digitalRead(12) == false) {
 		autonomous();
 	} else {
-		if (digitalRead(11) == false) {
-			drivingTask = taskCreate(DrivingTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
-			manipulatorTask = taskCreate(ManipulatorTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
-			speakerTask = taskCreate(SpeakerTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
+		if (digitalRead(11) == true) {
+			internetMode = true;
+		}
+		drivingTask = taskCreate(DrivingTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
+		manipulatorTask = taskCreate(ManipulatorTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
+		speakerTask = taskCreate(SpeakerTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
 
-			while(1) {
-				if (lastAnnounce + 5000 > millis())
-					continue;
-
-				fputs("joshbot v1.0 connected we rowdy", uart1);
+		while(1) {
+			if (lastAnnounce + 5000 < millis()) {
+				if (internetMode) {
+					fputs("joshbot v1.0 connected we rowdy - internet mode", uart1);
+				} else {
+					fputs("joshbot v1.0 connected we rowdy", uart1);
+				}
 				lastAnnounce = millis();
 			}
-		} else {
-		    internetMode = true;
-			manipulatorTask = taskCreate(ManipulatorTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
-			speakerTask = taskCreate(SpeakerTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
 
-			while(1) {
-				if (lastAnnounce + 5000 < millis()) {
-					fputs("joshbot v1.0 connected we rowdy", uart1);
-				    lastAnnounce = millis();
-				}
+			if (!internetMode)
+				continue;
 
-				char* strBuff;
-				char* ret = fgets(strBuff, 6, uart1);
+			char strBuff[100];
+			char* ret = fgets(strBuff, 100, uart1);
+			fprintf(uart1, "joshbot got: %s", ret);
 
-				if (ret != NULL) {
-				    xAxisMotorShit = 0;
-				    yAxisMotorShit = 0;
+			if (ret != NULL) {
+				xAxisMotorShit = 0;
+				yAxisMotorShit = 0;
 
-                    //What do we need to set the motor to?
-                    int mVal;
-                    char* substr;
-                    strncpy(substr, ret+1, strlen(ret));
-                    mVal = atoi(substr);
+				//What do we need to set the motor to?
+				int mVal;
+				char substr[4];
+				strncpy(substr, ret+1, strlen(ret));
+				mVal = atoi(substr);
 
-                    if (ret[0] == 'Y') {
-                        yAxisMotorShit = mVal;
-                    } else if (ret[0] == 'X') {
-                        xAxisMotorShit = mVal;
-                    }
+				//Send this to robot: Y+127
+
+				if (ret[0] == 'Y') {
+					yAxisMotorShit = mVal;
+				} else if (ret[0] == 'X') {
+					xAxisMotorShit = mVal;
 				}
 			}
 		}
