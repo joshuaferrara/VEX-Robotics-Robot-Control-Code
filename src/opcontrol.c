@@ -41,7 +41,7 @@ void DrivingTask(void *arg) {
 			X2 = (abs(joystickGetAnalog(1, 3)) > threshold ? -joystickGetAnalog(1, 3) : 0);
 		} else {
 			Y1 = (abs(xAxisMotorShit) > threshold ? xAxisMotorShit : 0);
-			X1 = (abs(strafeAxisMotorShit) > threshold ? strafeAxisMotorShit : 0); //TODO: Strafing not yet implemented in web interface
+			X1 = (abs(strafeAxisMotorShit) > threshold ? -strafeAxisMotorShit : 0);
 			X2 = (abs(yAxisMotorShit) > threshold ? -yAxisMotorShit : 0);
 		}
 
@@ -212,9 +212,7 @@ void operatorControl() {
 
 				char* controlChar[2];
 				strncpy(controlChar, ret, 2);
-
 				fprintf(uart1, "control char %s\n", controlChar);
-
 				switch(atoi(controlChar)) {
 					case -1:
 						//Stop all motors
