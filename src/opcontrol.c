@@ -19,6 +19,8 @@ bool internetMode = false;
 int yAxisMotorShit;
 /** Variable to hold x-axis motor shit */
 int xAxisMotorShit;
+/** Variable to hold strafe motor shit */
+int strafeAxisMotorShit;
 
 /**
  * This task drives the motors required to move the robot. \n
@@ -33,13 +35,13 @@ void DrivingTask(void *arg) {
 	xAxisMotorShit = 0;
 	yAxisMotorShit = 0;
 	while (1) {
-		if (internetMode) {
+		if (!internetMode) {
 			Y1 = (abs(joystickGetAnalog(1, 4)) > threshold ? joystickGetAnalog(1, 4) : 0);
 			X1 = (abs(joystickGetAnalog(1, 1)) > threshold ? joystickGetAnalog(1, 1) : 0);
 			X2 = (abs(joystickGetAnalog(1, 3)) > threshold ? -joystickGetAnalog(1, 3) : 0);
 		} else {
 			Y1 = (abs(xAxisMotorShit) > threshold ? xAxisMotorShit : 0);
-			X1 = (abs(joystickGetAnalog(1, 1)) > threshold ? joystickGetAnalog(1, 1) : 0); //TODO: Strafing not yet implemented in web interface
+			X1 = (abs(strafeAxisMotorShit) > threshold ? strafeAxisMotorShit : 0); //TODO: Strafing not yet implemented in web interface
 			X2 = (abs(yAxisMotorShit) > threshold ? -yAxisMotorShit : 0);
 		}
 
@@ -136,6 +138,21 @@ void SpeakerTask(void *arg) {
 long lastAnnounce;
 
 /**
+ * Record of last time we enabled internet.
+ */
+long lastInternet;
+
+/**
+ * Record of last time robot received a x axis command
+ */
+long lastX;
+
+/**
+ * Record of last time robot received a y axis command.
+ */
+long lastY;
+
+/**
  * Operator control code.
  */
 void operatorControl() {
@@ -144,7 +161,7 @@ void operatorControl() {
 	if (digitalRead(12) == false) {
 		autonomous();
 	} else {
-		if (digitalRead(11) == true) {
+		if (digitalRead(11) == false) {
 			internetMode = true;
 		}
 		drivingTask = taskCreate(DrivingTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
@@ -161,29 +178,67 @@ void operatorControl() {
 				lastAnnounce = millis();
 			}
 
+			if (digitalRead(11) == false) {
+				if (lastInternet + 1000 < millis()) {
+					internetMode = true;
+					lastInternet = millis();
+				}
+			}
+
 			if (!internetMode)
 				continue;
 
 			char strBuff[100];
 			char* ret = fgets(strBuff, 100, uart1);
-			fprintf(uart1, "joshbot got: %s", ret);
 
 			if (ret != NULL) {
+				fprintf(uart1, "axis: %c\n", strBuff[0]);
+				fprintf(uart1, "we're getting somewhere\n");
+				printf("getting somewhere axis: %c", strBuff[0]);
+
 				xAxisMotorShit = 0;
 				yAxisMotorShit = 0;
 
 				//What do we need to set the motor to?
-				int mVal;
+				signed int mVal;
 				char substr[4];
-				strncpy(substr, ret+1, strlen(ret));
+				strncpy(substr, strBuff+2, strlen(strBuff));
 				mVal = atoi(substr);
 
-				//Send this to robot: Y+127
+				fprintf(uart1, "motor val parsed: %d\n", mVal);
+				printf("motor val parsed: %d", mVal);
 
-				if (ret[0] == 'Y') {
-					yAxisMotorShit = mVal;
-				} else if (ret[0] == 'X') {
-					xAxisMotorShit = mVal;
+				//Send this to robot: 03+127 or 04+000 or 03-127
+
+				char* controlChar[2];
+				strncpy(controlChar, ret, 2);
+
+				fprintf(uart1, "control char %s\n", controlChar);
+
+				switch(atoi(controlChar)) {
+					case -1:
+						//Stop all motors
+						yAxisMotorShit = 0;
+						xAxisMotorShit = 0;
+						break;
+					case 1:
+						strafeAxisMotorShit = mVal;
+						break;
+					case 2:
+
+						break;
+					case 3:
+						yAxisMotorShit = mVal;
+						fprintf(uart1, "yaxisstuff parsed: %d\n", yAxisMotorShit);
+						printf("yaxisstuff parsed: %d", yAxisMotorShit);
+						lastY = millis();
+						break;
+					case 4:
+						xAxisMotorShit = mVal;
+						fprintf(uart1, "xaxisstuff parsed: %d\n", xAxisMotorShit);
+						printf("xaxisstuff parsed: %d", xAxisMotorShit);
+						lastX = millis();
+						break;
 				}
 			}
 		}
