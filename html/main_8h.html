@@ -192,14 +192,15 @@ Contains code to run our autonomous plans. <br />
 <p>Runs the user operator control code. This function will be started in its own task with the default priority and stack size whenever the robot is enabled via the Field Management System or the VEX Competition Switch in the operator control mode. If the robot is disabled or communications is lost, the operator control task will be stopped by the kernel. Re-enabling the robot will restart the task, not resume it from where it left off.</p>
 <p>If no VEX Competition Switch or Field Management system is plugged in, the VEX Cortex will run the operator control task. Be warned that this will also occur if the VEX Cortex is tethered directly to a computer via the USB A to A cable without any VEX Joystick attached.</p>
 <p>Code running in this task can take almost any action, as the VEX Joystick is available and the scheduler is operational. However, proper use of <a class="el" href="_a_p_i_8h.html#a1c59207742a1acf45a8957d7f04f9dfe">delay()</a> or <a class="el" href="_a_p_i_8h.html#ae93bc867b1aa4a12d6536a497f1b6869">taskDelayUntil()</a> is highly recommended to give other tasks (including system tasks such as updating LCDs) time to run.</p>
-<p>This task should never exit; it should end with some kind of infinite loop, even if empty. </p>
+<p>This task should never exit; it should end with some kind of infinite loop, even if empty.</p>
+<p>Operator control code. </p>
 
 </div>
 </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Feb 20 2015 17:33:22 for josh&#39;s super legit robit code by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Mar 2 2015 10:52:43 for josh&#39;s super legit robit code by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

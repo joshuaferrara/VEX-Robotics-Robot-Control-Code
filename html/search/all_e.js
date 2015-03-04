@@ -23,8 +23,9 @@ var searchData=
   ['speakerplayarray',['speakerPlayArray',['../_a_p_i_8h.html#af91f9f80737d283ff82a96596f833854',1,'API.h']]],
   ['speakerplayrtttl',['speakerPlayRtttl',['../_a_p_i_8h.html#a6971b95fa28048bf134b7421b7f2faee',1,'API.h']]],
   ['speakershutdown',['speakerShutdown',['../_a_p_i_8h.html#a8d6d3ddc25b8408b0270cd2ccb9505ce',1,'API.h']]],
-  ['speakertask',['speakerTask',['../opcontrol_8c.html#a29754c0d165c3e366278bf93ee231e35',1,'speakerTask():&#160;opcontrol.c'],['../opcontrol_8c.html#af0e5dc95252c94a68674d114d0002a33',1,'SpeakerTask(void *arg):&#160;opcontrol.c']]],
+  ['speakertask',['SpeakerTask',['../opcontrol_8c.html#af0e5dc95252c94a68674d114d0002a33',1,'SpeakerTask(void *arg):&#160;opcontrol.c'],['../opcontrol_8c.html#a29754c0d165c3e366278bf93ee231e35',1,'speakerTask():&#160;opcontrol.c']]],
   ['sprintf',['sprintf',['../_a_p_i_8h.html#acbfbfc380f865613ad5ff3cae256bdc4',1,'API.h']]],
   ['stdin',['stdin',['../_a_p_i_8h.html#aaca70138f0cb63ddb026921afc635179',1,'API.h']]],
-  ['stdout',['stdout',['../_a_p_i_8h.html#a0c0ef221f95f64e8632451312fd18cc8',1,'API.h']]]
+  ['stdout',['stdout',['../_a_p_i_8h.html#a0c0ef221f95f64e8632451312fd18cc8',1,'API.h']]],
+  ['strafeaxismotorvalue',['strafeAxisMotorValue',['../opcontrol_8c.html#a23b6a85abc40bf3aef0b51a489bd2826',1,'opcontrol.c']]]
 ];

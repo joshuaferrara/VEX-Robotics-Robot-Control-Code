@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['lastannounce',['lastAnnounce',['../opcontrol_8c.html#ac9f4fe2e8e1c1fd43f581cc76201bc23',1,'opcontrol.c']]],
-  ['lastplayed',['lastPlayed',['../opcontrol_8c.html#a4da418467b98f6954cb8d0cf3d9b122b',1,'opcontrol.c']]]
+  ['internetmode',['internetMode',['../opcontrol_8c.html#a065e2bd32d886d2c4c5e0945d4a8c976',1,'opcontrol.c']]]
 ];

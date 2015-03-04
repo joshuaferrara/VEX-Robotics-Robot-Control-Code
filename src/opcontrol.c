@@ -6,7 +6,8 @@
 
 #include "main.h"
 
-
+/** Variable to hold reference to telemetry task */
+TaskHandle telemetryTask;
 /** Variable to hold reference to the drive task */
 TaskHandle drivingTask;
 /** Variable to hold reference to the manipulator task */
@@ -15,12 +16,12 @@ TaskHandle manipulatorTask;
 TaskHandle speakerTask;
 /** Variable to determine if we are in internet mode */
 bool internetMode = false;
-/** Variable to hold y-axis motor shit */
-int yAxisMotorShit;
-/** Variable to hold x-axis motor shit */
-int xAxisMotorShit;
-/** Variable to hold strafe motor shit */
-int strafeAxisMotorShit;
+/** Variable to hold y-axis motor value */
+int yAxisMotorValue;
+/** Variable to hold x-axis motor value */
+int xAxisMotorValue;
+/** Variable to hold strafe motor value */
+int strafeAxisMotorValue;
 
 /**
  * This task drives the motors required to move the robot. \n
@@ -32,17 +33,15 @@ int strafeAxisMotorShit;
  */
 void DrivingTask(void *arg) {
 	int X2 = 0, Y1 = 0, X1 = 0, threshold = 15;
-	xAxisMotorShit = 0;
-	yAxisMotorShit = 0;
 	while (1) {
 		if (!internetMode) {
 			Y1 = (abs(joystickGetAnalog(1, 4)) > threshold ? joystickGetAnalog(1, 4) : 0);
 			X1 = (abs(joystickGetAnalog(1, 1)) > threshold ? joystickGetAnalog(1, 1) : 0);
 			X2 = (abs(joystickGetAnalog(1, 3)) > threshold ? -joystickGetAnalog(1, 3) : 0);
 		} else {
-			Y1 = (abs(xAxisMotorShit) > threshold ? xAxisMotorShit : 0);
-			X1 = (abs(strafeAxisMotorShit) > threshold ? -strafeAxisMotorShit : 0);
-			X2 = (abs(yAxisMotorShit) > threshold ? -yAxisMotorShit : 0);
+			Y1 = (abs(xAxisMotorValue) > threshold ? xAxisMotorValue : 0);
+			X1 = (abs(strafeAxisMotorValue) > threshold ? -strafeAxisMotorValue : 0);
+			X2 = (abs(yAxisMotorValue) > threshold ? -yAxisMotorValue : 0);
 		}
 
 		if (X1 < 14 && X1 > -14) {
@@ -95,40 +94,48 @@ const char * songs[10] = {
 		"",
 };
 
-/** Last time a song was played */
-long lastPlayed;
-
 /**
  * This task controls the output of the speaker on our robot.
  */
 void SpeakerTask(void *arg) {
 	speakerInit();
-	//speakerPlayRtttl(songs[rand() % sizeof(songs)]);
 	while (1) {
-		//if (lastPlayed + 10000 < millis()) {
-			if (joystickGetDigital(2, 7, JOY_UP)) {
-				speakerPlayRtttl(songs[0]);
-				lastPlayed = millis();
-			} else if (joystickGetDigital(2, 7, JOY_DOWN)) {
-				speakerPlayRtttl(songs[1]);
-				lastPlayed = millis();
-			} else if (joystickGetDigital(2, 7, JOY_LEFT)) {
-				speakerPlayRtttl(songs[2]);
-				lastPlayed = millis();
-			} else if (joystickGetDigital(2, 7, JOY_RIGHT)) {
-				speakerPlayRtttl(songs[3]);
-				lastPlayed = millis();
-			} else if (joystickGetDigital(2, 8, JOY_UP)) {
-				speakerPlayRtttl(songs[4]);
-				lastPlayed = millis();
-			} else if (joystickGetDigital(2, 8, JOY_LEFT)) {
-				speakerPlayRtttl(songs[5]);
-				lastPlayed = millis();
-			} else if (joystickGetDigital(2, 8, JOY_RIGHT)) {
-				speakerPlayRtttl(songs[6]);
-				lastPlayed = millis();
-			}
-		//}
+		if (joystickGetDigital(2, 7, JOY_UP)) {
+			speakerPlayRtttl(songs[0]);
+		} else if (joystickGetDigital(2, 7, JOY_DOWN)) {
+			speakerPlayRtttl(songs[1]);
+		} else if (joystickGetDigital(2, 7, JOY_LEFT)) {
+			speakerPlayRtttl(songs[2]);
+		} else if (joystickGetDigital(2, 7, JOY_RIGHT)) {
+			speakerPlayRtttl(songs[3]);
+		} else if (joystickGetDigital(2, 8, JOY_UP)) {
+			speakerPlayRtttl(songs[4]);
+		} else if (joystickGetDigital(2, 8, JOY_LEFT)) {
+			speakerPlayRtttl(songs[5]);
+		} else if (joystickGetDigital(2, 8, JOY_RIGHT)) {
+			speakerPlayRtttl(songs[6]);
+		}
+	}
+}
+
+/** Record of last time we have sent telemetry to the Raspberry Pi */
+long lastTelemetry;
+
+/**
+ * This task controls the outbound telemetry of our robot. Telemetry is sent every
+ * 5 seconds over serial.
+ */
+void TelemetryTask(void *arg) {
+	while(1) {
+		if (lastTelemetry + 5000 < millis()) {
+			unsigned int mainBattery = powerLevelMain();
+			unsigned int backupBattery = powerLevelBackup();
+			int secondsSinceStart = millis() / 1000;
+
+			fprintf(uart1, "%u//%u//%d", mainBattery, backupBattery, secondsSinceStart);
+
+			lastTelemetry = millis();
+		}
 	}
 }
 
@@ -143,16 +150,6 @@ long lastAnnounce;
 long lastInternet;
 
 /**
- * Record of last time robot received a x axis command
- */
-long lastX;
-
-/**
- * Record of last time robot received a y axis command.
- */
-long lastY;
-
-/**
  * Operator control code.
  */
 void operatorControl() {
@@ -161,12 +158,10 @@ void operatorControl() {
 	if (digitalRead(12) == false) {
 		autonomous();
 	} else {
-		if (digitalRead(11) == false) {
-			internetMode = true;
-		}
 		drivingTask = taskCreate(DrivingTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
 		manipulatorTask = taskCreate(ManipulatorTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
 		speakerTask = taskCreate(SpeakerTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
+		telemetryTask = taskCreate(telemetryTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
 
 		while(1) {
 			if (lastAnnounce + 5000 < millis()) {
@@ -180,7 +175,7 @@ void operatorControl() {
 
 			if (digitalRead(11) == false) {
 				if (lastInternet + 1000 < millis()) {
-					internetMode = true;
+					internetMode = !internetMode;
 					lastInternet = millis();
 				}
 			}
@@ -192,50 +187,30 @@ void operatorControl() {
 			char* ret = fgets(strBuff, 100, uart1);
 
 			if (ret != NULL) {
-				fprintf(uart1, "axis: %c\n", strBuff[0]);
-				fprintf(uart1, "we're getting somewhere\n");
-				printf("getting somewhere axis: %c", strBuff[0]);
-
-				xAxisMotorShit = 0;
-				yAxisMotorShit = 0;
-
-				//What do we need to set the motor to?
 				signed int mVal;
 				char substr[4];
 				strncpy(substr, strBuff+2, strlen(strBuff));
 				mVal = atoi(substr);
-
-				fprintf(uart1, "motor val parsed: %d\n", mVal);
-				printf("motor val parsed: %d", mVal);
-
 				//Send this to robot: 03+127 or 04+000 or 03-127
-
 				char* controlChar[2];
 				strncpy(controlChar, ret, 2);
-				fprintf(uart1, "control char %s\n", controlChar);
 				switch(atoi(controlChar)) {
 					case -1:
 						//Stop all motors
-						yAxisMotorShit = 0;
-						xAxisMotorShit = 0;
+						yAxisMotorValue = 0;
+						xAxisMotorValue = 0;
 						break;
 					case 1:
-						strafeAxisMotorShit = mVal;
+						strafeAxisMotorValue = mVal;
 						break;
 					case 2:
 
 						break;
 					case 3:
-						yAxisMotorShit = mVal;
-						fprintf(uart1, "yaxisstuff parsed: %d\n", yAxisMotorShit);
-						printf("yaxisstuff parsed: %d", yAxisMotorShit);
-						lastY = millis();
+						yAxisMotorValue = mVal;
 						break;
 					case 4:
-						xAxisMotorShit = mVal;
-						fprintf(uart1, "xaxisstuff parsed: %d\n", xAxisMotorShit);
-						printf("xaxisstuff parsed: %d", xAxisMotorShit);
-						lastX = millis();
+						xAxisMotorValue = mVal;
 						break;
 				}
 			}

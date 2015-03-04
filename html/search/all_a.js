@@ -1,7 +1,7 @@
 var searchData=
 [
   ['lastannounce',['lastAnnounce',['../opcontrol_8c.html#ac9f4fe2e8e1c1fd43f581cc76201bc23',1,'opcontrol.c']]],
-  ['lastplayed',['lastPlayed',['../opcontrol_8c.html#a4da418467b98f6954cb8d0cf3d9b122b',1,'opcontrol.c']]],
+  ['lastinternet',['lastInternet',['../opcontrol_8c.html#abaeee7bd58efce25dacead4edfa0ebd5',1,'opcontrol.c']]],
   ['lcd_5fbtn_5fcenter',['LCD_BTN_CENTER',['../_a_p_i_8h.html#abf8903693b4a95a6b653916d5f6fe486',1,'API.h']]],
   ['lcd_5fbtn_5fleft',['LCD_BTN_LEFT',['../_a_p_i_8h.html#afa86afc6491531fb4b4d7f1e18803852',1,'API.h']]],
   ['lcd_5fbtn_5fright',['LCD_BTN_RIGHT',['../_a_p_i_8h.html#a7851ef3eb7573b194efb0a05d88f2c35',1,'API.h']]],
